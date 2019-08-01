@@ -1,4 +1,3 @@
 Account.txt 
 demo.py 
-HalloFameRecord.log
-zesonpso_log/*.log
+*_log/*.log
