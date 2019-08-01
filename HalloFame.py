@@ -42,7 +42,7 @@ class StockPoint:
 					return False
 				priceline = resp[4].split(',')
 				afterDate = dateline[when:]
-				if len(afterDate) < 3:
+				if len(afterDate) < 1:
 					return False
 				afterPri  = [ float(pri) for pri in priceline[when:] ]
 				self.inPrice = afterPri[0]
@@ -84,6 +84,7 @@ class Stockist:
 
 	def promot(self, pttDate, sid, Long_or_Short):
 		stk = StockPoint(pttDate, sid, Long_or_Short)
+
 		if stk.setup():
 			self.promotions.append(stk)
 
@@ -118,13 +119,12 @@ class PTTBoard:
 
 		self.dict[pttID].promot(pttDate, sid, Long_or_Short)
 
-	def saveAll(self):
+	def saveAll(self,log):
 		wins, proms = self.winrateAll()
-		with codecs.open( 'HalloFameRecord.log', 'w', 'utf-8') as log:
-			log.write('Whole PTTStock Winrate\n')
-			log.write('wins: ' + str(wins) + '  proms: ' + str(proms) + '\n\n')
-			for fame in self.dict:
-				self.dict[fame].saveRecord(log)
+		log.write('\nWhole PTTStock Winrate\n')
+		log.write('wins: ' + str(wins) + '  proms: ' + str(proms) + '\n\n')
+		for fame in self.dict:
+			self.dict[fame].saveRecord(log)
 
 
 	def winrateAll(self):
@@ -156,43 +156,61 @@ class PTTStockBot:
 			self.PTTBot.Log('登入失敗')
 			sys.exit()
 
-		self.Board = PTTBoard()
+		self.Board 	= PTTBoard()
+		self.CrawPost   = 0
+		self.RepoNum 	= 0
+		self.PromNum 	= 0
+		self.OtherNum	= 0
 
 
 	def save(self):
-		self.Board.saveAll()
+		with codecs.open( 'HalloFameRecord.log', 'w', 'utf-8') as log:
+			log.write('總共：'+str(self.CrawPost)+'  有效：'+str(self.PromNum)+'  無效：'+str(self.OtherNum)+'　　RePo：'+str(self.RepoNum)+'\n')
+			self.Board.saveAll(log)
 
 
 	def PostHandler(self,Post):
-		result = self.breakdownTitle(Post.getTitle())
-		if result:
-			self.Board.add(Post.getAuthor(), Post.getDate(), result[0], result[1])
+		if 'Re:' not in Post.getTitle():
+			content = Post.getContent().split('1. 標的：')[1].split('2. 分類：')
+			content1 = content[0]
+			content2 = content[1].split('3. 分析/正文')[0]
+			sid   = self.getSid(content1)
+			trend = self.getTrend(content2)
+			print('\n')
+			print(Post.getTitle())
+			if sid and trend:
+				print(sid,trend,'\n')
+				self.Board.add(Post.getAuthor(), Post.getDate(), sid, trend)
+				self.PromNum += 1
+			else:
+				self.OtherNum += 1
+		else:
+			self.RepoNum += 1
 
 
-	def breakdownTitle(self,title):
+	def getSid(self, plaintext):
 		digits = ''
-		words  = ''
-		chars  = title
-		for char in chars:
+		for char in plaintext:
 			if char.isdigit():
 				digits += char
-			else:
-				words  += char
-
-		if len(digits) != 4:
-			return []
-		elif 'Re:' in words:
-			return []
+		if len(digits) == 4:
+			return digits
 		else:
-			if '多' in words:
-				return [digits, 'Long']
-			if '空' in words:
-				return [digits, 'Short']
-			else:
-				return [] 
+			return False
+
+	def getTrend(self, plaintext):
+		long_count 	= plaintext.count('多')
+		short_count = plaintext.count('空')
+		if long_count == short_count:
+			return False
+		elif long_count > short_count:
+			return 'Long'
+		else:
+			return 'Short'
 
 
 	def getPromotions(self,CrawPost):
+		self.CrawPost = CrawPost
 		ErrCode, NewestIndex = self.PTTBot.getNewestIndex(Board='Stock', SearchType=PTT.PostSearchType.Keyword, Search='[標的]')
 		if ErrCode == PTT.ErrorCode.Success:
 			self.PTTBot.Log('取得 ' + 'Stock' + ' 板最新文章編號成功: ' + str(NewestIndex))
@@ -208,7 +226,6 @@ class PTTStockBot:
 
 
 
-
 if __name__ == '__main__':
 
 	postCounts = input('\n你要爬幾篇標的文: ')
@@ -218,10 +235,10 @@ if __name__ == '__main__':
 	HallofFame.save()
 
 	#board = PTTBoard()
-	#board.add('zesonpso', 'xxx Mar 19 2019', '1722', 'Long')
-	#board.add('doliny', 'Mon Jul 22 2019', '2330', 'Long')
-	#board.add('dersonhome', 'Thu Jul 25 2019', '5269', 'Short')
-	#board.add('zesonpso', 'Thu May 16 2019', '2356', 'Long')
+	#board.add('zesonpso', 'xxx Mar 19 09:25 2019', '1722', 'Long')
+	#board.add('doliny', 'Mon Jul 22 07:20 2019', '2330', 'Long')
+	#board.add('dersonhome', 'Thu Jul 25 16:25 2019', '5269', 'Short')
+	#board.add('zesonpso', 'Thu May 16 11:30 2019', '2356', 'Long')
 	#board.saveAll()
 
 
