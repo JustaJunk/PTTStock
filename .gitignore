@@ -1,3 +1,4 @@
 Account.txt 
-demo.py 
-*_log/*.log
+test/ 
+*_log/
+famesID.txt

@@ -31,17 +31,27 @@ class PTTfames:
 	def addFame(self,pttID):
 		self.famelist.append(pttID)
 
+	def addFameFile(self,filename):
+		if not os.path.exists(filename):
+			print(filename, 'does not exist')
+		else:
+			with codecs.open(filename,'r','utf-8') as FamesFile:
+				for pttID in FamesFile:
+					if pttID:
+						self.famelist.append(pttID)
+
+
 	def writeLog(self,Post,fame):
 		date = Post.getDate()[4:10]
 		filename = date.replace(' ','_') + '.log'
 		filepath = './' + fame + '_log/'
 		if not os.path.exists(filepath):
 			os.makedirs(filepath)
-		with codecs.open( filepath + filename, 'w', 'utf-8') as ResultFile:
-			ResultFile.write( '\n' + Post.getDate() + '\n\n')
+		with codecs.open( filepath + filename, 'w', 'utf-8') as LogFile:
+			LogFile.write( '\n' + Post.getDate() + '\n\n')
 			for Push in Post.getPushList():
 				if Push.getAuthor() == fame:        
-					ResultFile.write( Push.getContent() + '\n' )
+					LogFile.write( Push.getContent() + '\n' )
 
 	def PostHandler(self,Post):
 		for fame in self.famelist:
@@ -65,12 +75,16 @@ class PTTfames:
 
 if __name__ == '__main__':
 	pttFames = PTTfames()
-	pttFames.addFame("zesonpso")
-	pttFames.addFame("stockdog")
-	while True:
-		try:
-			pttFames.getChat(1)
-			time.sleep(300)
-		except KeyboardInterrupt:
-			break
+	pttFames.addFameFile('famesID.txt')
+
+	if len(sys.argv) < 2:
+		while True:
+			try:
+				pttFames.getChat(1)
+				time.sleep(300)
+			except KeyboardInterrupt:
+				break
+	else:
+		pttFames.getChat(int(sys.argv[1]))
+
 
