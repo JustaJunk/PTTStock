@@ -36,7 +36,9 @@ class PTTfames:
 			print(filename, 'does not exist')
 		else:
 			with codecs.open(filename,'r','utf-8') as FamesFile:
-				for pttID in FamesFile:
+				famelist = FamesFile.readlines()
+				for pttID in famelist:
+					pttID = pttID.replace('\n','').replace('\r','')
 					if pttID:
 						self.famelist.append(pttID)
 
@@ -76,6 +78,7 @@ class PTTfames:
 if __name__ == '__main__':
 	pttFames = PTTfames()
 	pttFames.addFameFile('famesID.txt')
+	print(pttFames.famelist)
 
 	if len(sys.argv) < 2:
 		while True:
