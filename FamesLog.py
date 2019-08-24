@@ -96,13 +96,13 @@ class PTTfames:
 if __name__ == '__main__':
 	pttFames_exist = False
 	while True:
-		choice = input('\n1.盤中聊天\n2.盤後聊天\n3.清除紀錄\n4.離開程式\n\n執行選項: ')
+		choice = input('\n 1.盤中聊天\n 2.盤後聊天\n 3.清除紀錄\n 4.離開程式\n\n 執行選項: ')
 
 		if choice == '1' or choice == '2':
 			try:
-				crawNum = int(input('爬文數: '))
+				crawNum = int(input(' 爬文數: '))
 			except ValueError:
-				print('請輸數字！')
+				print(' 請輸數字！')
 				continue
 
 			if not pttFames_exist:
