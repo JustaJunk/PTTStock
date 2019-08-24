@@ -80,16 +80,17 @@ class PTTfames:
 		if ErrCode == PTT.ErrorCode.Success:
 			self.PTTBot.Log('爬行成功共 ' + str(SuccessCount) + ' 篇文章 共有 ' + str(DeleteCount) + ' 篇文章被刪除')
 
-	def run(self,argv,timing):
-		if len(argv) < 2:
-			while True:
+	def run(self,CrawPost,timing):
+		if CrawPost == 0:
+			for i in range(100):
 				try:
 					self.getChat(1,timing)
+					print('更新第'+str(i+1)+'次，Ctrl-C 可中斷更新...')
 					time.sleep(300)
 				except KeyboardInterrupt:
 					break
 		else:
-			self.getChat(int(sys.argv[1]),timing)
+			self.getChat(CrawPost,timing)
 
 
 if __name__ == '__main__':
@@ -98,14 +99,20 @@ if __name__ == '__main__':
 		choice = input('\n1.盤中聊天\n2.盤後聊天\n3.清除紀錄\n4.離開程式\n\n執行選項: ')
 
 		if choice == '1' or choice == '2':
+			try:
+				crawNum = int(input('爬文數: '))
+			except ValueError:
+				print('請輸數字！')
+				continue
+
 			if not pttFames_exist:
 				pttFames = PTTfames()
 				pttFames_exist = True
 			pttFames.addFameFile('famesID.txt')
 			if choice == '1':
-				pttFames.run(sys.argv,'intrade')
+				pttFames.run(crawNum,'intrade')
 			else:
-				pttFames.run(sys.argv,'after')
+				pttFames.run(crawNum,'after')
 
 		elif choice == '3':
 			for file in os.listdir('.'):
