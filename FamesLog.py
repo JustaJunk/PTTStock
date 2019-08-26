@@ -43,6 +43,9 @@ class PTTfames:
 					if pttID:
 						self.famelist.append(pttID)
 
+	def isNotEmpty(self):
+		return len(self.famelist)>0
+
 
 	def writeLog(self,Post,fame):
 		date = Post.getDate()[4:10]
@@ -108,11 +111,13 @@ if __name__ == '__main__':
 			if not pttFames_exist:
 				pttFames = PTTfames()
 				pttFames_exist = True
-			pttFames.addFameFile('famesID.txt')
-			if choice == '1':
+			pttFames.addFameFile('trackID.txt')
+			if choice == '1' and pttFames.isNotEmpty():
 				pttFames.run(crawNum,'intrade')
-			else:
+			elif choice == '2' and pttFames.isNotEmpty():
 				pttFames.run(crawNum,'after')
+			else:
+				print('No fames to track')
 
 		elif choice == '3':
 			for file in os.listdir('.'):
