@@ -68,7 +68,7 @@ class PTTfames:
 		self.timing = timing
 		if timing == 'intrade':
 			inputSearch = '盤中閒聊'
-		elif timing == 'after':
+		elif timing == 'offtrade':
 			inputSearch = '盤後閒聊'
 		else:
 			inputSearch = ''
@@ -115,7 +115,7 @@ if __name__ == '__main__':
 			if choice == '1' and pttFames.isNotEmpty():
 				pttFames.run(crawNum,'intrade')
 			elif choice == '2' and pttFames.isNotEmpty():
-				pttFames.run(crawNum,'after')
+				pttFames.run(crawNum,'offtrade')
 			else:
 				print('No fames to track')
 
