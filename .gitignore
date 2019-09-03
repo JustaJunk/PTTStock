@@ -1,4 +1,4 @@
-Account.txt 
-test/ 
+**.txt
+**.log
+test/
 *_log/
-trackID.txt

@@ -8,7 +8,7 @@ import codecs
 from PTTLibrary import PTT
 
 class PTTfames:
-	def __init__(self):
+	def __init__(self,outputPath):
 		try:
 			with open('Account.txt') as AccountFile:
 				Account = json.load(AccountFile)
@@ -28,6 +28,7 @@ class PTTfames:
 
 		self.timing = 'intrade'
 		self.famelist = []
+		self.outputPath = outputPath
 
 	def addFame(self,pttID):
 		self.famelist.append(pttID)
@@ -47,21 +48,22 @@ class PTTfames:
 		return len(self.famelist)>0
 
 
-	def writeLog(self,Post,fame):
+	def PostHandler(self,Post):
 		date = Post.getDate()[4:10]
 		filename = date.replace(' ','_') + '_' + self.timing + '.log'
-		filepath = './' + fame + '_log/'
-		if not os.path.exists(filepath):
-			os.makedirs(filepath)
-		with codecs.open( filepath + filename, 'w', 'utf-8') as LogFile:
+		if not os.path.exists(self.outputPath):
+			os.makedirs(self.outputPath)
+		with codecs.open( self.outputPath + filename, 'w', 'utf-8') as LogFile:
 			LogFile.write( '\n' + Post.getDate() + '\n\n')
 			for Push in Post.getPushList():
-				if Push.getAuthor() == fame:        
-					LogFile.write( Push.getContent() + '\n' )
-
-	def PostHandler(self,Post):
-		for fame in self.famelist:
-			self.writeLog(Post,fame)
+				push_author = Push.getAuthor()
+				if Push.getAuthor() in self.famelist:
+					if len(push_author) > 8:
+						push_author = push_author[0:8]
+						pre_space = ' '
+					else:
+						pre_space = ' '*(8-len(push_author)+1)
+					LogFile.write( push_author + pre_space + Push.getContent() + '\n' )
 
 	def getChat(self,CrawPost,timing):
 		inputSearchType = PTT.PostSearchType.Keyword
@@ -98,6 +100,7 @@ class PTTfames:
 
 if __name__ == '__main__':
 	pttFames_exist = False
+	output_path = 'output_log/'
 	while True:
 		choice = input('\n 1.盤中聊天\n 2.盤後聊天\n 3.清除紀錄\n 4.離開程式\n\n 執行選項: ')
 
@@ -109,7 +112,7 @@ if __name__ == '__main__':
 				continue
 
 			if not pttFames_exist:
-				pttFames = PTTfames()
+				pttFames = PTTfames(output_path)
 				pttFames_exist = True
 			pttFames.addFameFile('trackID.txt')
 			if choice == '1' and pttFames.isNotEmpty():
@@ -120,9 +123,11 @@ if __name__ == '__main__':
 				print('No fames to track')
 
 		elif choice == '3':
-			for file in os.listdir('.'):
-				if '_log' in file:
-					shutil.rmtree(file)
+			if os.path.exists(output_path):
+				for file in os.listdir(output_path):
+					os.remove(output_path + file)
+			else:
+				print('\n 尚未建立輸出路徑')
 
 		else:
 			break
