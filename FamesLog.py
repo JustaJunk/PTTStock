@@ -1,7 +1,7 @@
 #!/usr/bin/python
 #-*- coding: UTF-8 -*-
 
-import os, sys, time, shutil
+import os, sys, time
 import json
 import getpass
 import codecs
