@@ -5,7 +5,7 @@ import os, sys, time
 import json
 import getpass
 import codecs
-from PTTLibrary import PTT
+from PTTLibrary import PTT # version=0.7.28
 
 class PTTfames:
 	def __init__(self,outputPath):
